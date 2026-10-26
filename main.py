@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier as KNN
+from sklearn.model_selection import train_test_split
 import pandas as pd
+import random
 
 plt.rcParams["toolbar"] = "None"
 
@@ -22,19 +24,24 @@ german_names = {
 }
 
 fish_data = list(zip(x,y))
+
+# 75% for training, 25% for testing; stratify so every species is in both parts
+fish_data_train, fish_data_test, labels_train, labels_test = train_test_split(
+    fish_data, labels, test_size=0.25, random_state=42, stratify=labels
+)
+
 knn = KNN(n_neighbors=3) # 3 is just a placeholder, idk yet what it'll be
-knn.fit(fish_data, labels)
+knn.fit(fish_data_train, labels_train)
 
-# still need to get new fish from csv
-# placeHolders for now
-
-new_width = 8
-new_length = 20
+# grabs any rnmd fish out of fish_data_test
+new_width,new_length = random.choice(fish_data_test) 
 new_fish = [(new_width, new_length)]
 
 prediction = knn.predict(new_fish)
-
 predicted_fish_name = species_names[prediction[0]]
+
+accuracy = knn.score(fish_data_test, labels_test)
+print(f"Accuracy: {accuracy:.0%}")
 
 # sets colors per fish
 for name, group in csv_fish_data.groupby("Species"):
